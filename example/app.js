@@ -16,6 +16,12 @@ win.open();
 var newskit = require('com.featherdirect.newskit');
 Ti.API.info("module is => " + newskit);
 
+// We can enableDevMode which removes the Newsstand Notifications Throttle
+newskit.enableDevMode;
+
+
+
+
 label.text = newskit.example();
 
 Ti.API.info("module exampleProp is => " + newskit.exampleProp);

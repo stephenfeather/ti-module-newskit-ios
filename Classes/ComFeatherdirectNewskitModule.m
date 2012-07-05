@@ -8,6 +8,7 @@
 #import "TiBase.h"
 #import "TiHost.h"
 #import "TiUtils.h"
+#import <NewsstandKit/NewsstandKit.h>
 
 @implementation ComFeatherdirectNewskitModule
 
@@ -34,6 +35,7 @@
 	[super startup];
 	
 	NSLog(@"[INFO] %@ loaded",self);
+
 }
 
 -(void)shutdown:(id)sender
@@ -102,5 +104,15 @@
 {
 	// example property setter
 }
+
+
+// We can enableDevMode which removes the throttle from news stand notifications
+
+-(void)enableDevMode
+{
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"NKDontThrottleNewsstandContentNotifications"];
+    NSLog(@"[INFO] Dev Mode Enabled.");
+}
+
 
 @end
