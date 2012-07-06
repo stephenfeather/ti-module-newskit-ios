@@ -4,10 +4,10 @@
 #
 version: 0.1
 apiversion: 2
-description: My module
-author: Your Name
+description: NewsKit for Titanium
+author: Stephen Feather
 license: Specify your license
-copyright: Copyright (c) 2012 by Your Company
+copyright: Copyright (c) 2012 by Stephen Feather
 
 
 # these should not be edited

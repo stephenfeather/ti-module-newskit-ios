@@ -35,6 +35,7 @@
 	[super startup];
 	
 	NSLog(@"[INFO] %@ loaded",self);
+    
 
 }
 
@@ -106,13 +107,77 @@
 }
 
 
-// We can enableDevMode which removes the throttle from news stand notifications
-
+// We can enableDevMode which removes the once per day throttle from news stand notifications
 -(void)enableDevMode
 {
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"NKDontThrottleNewsstandContentNotifications"];
     NSLog(@"[INFO] Dev Mode Enabled.");
+    return;
 }
+
+// We can addIssue to the NKLibrary. Takes 2 params, unique name and date (yyyy-MM-dd)
+// Returns an array of information about the issue.  If the issue is new, then newIssue is true
+-(id)addIssue:(id)args
+{
+    NSString *name = [args objectAtIndex:0];
+    NSString *dateStr = [args objectAtIndex:1];
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"yyyy-MM-dd"];
+    NSDate *date = [dateFormat dateFromString:dateStr];
+    [dateFormat release];
+    NKLibrary *library = [NKLibrary sharedLibrary];
+    NKIssue *nkIssue = [library issueWithName:name];
+    NSMutableDictionary *issue = [NSMutableDictionary dictionary];
+    if(!nkIssue) {
+        nkIssue = [library addIssueWithName:name date:date];
+        [issue setObject: @"true"  forKey: @"newIssue"];
+    } else {
+        [issue setObject: @"false"  forKey: @"newIssue"];
+    }
+    
+    [issue setObject: nkIssue.name  forKey: @"name"];
+    [issue setObject: nkIssue.date forKey:  @"date"];
+    [issue setObject: nkIssue.contentURL forKey:  @"contentURL"];
+    return issue;
+}
+
+// We can getIssue from the NKLibrary. Takes 1 param, unique name
+// Returns an array of information about the issue.
+-(id)getIssue:(id)args
+{
+    NSString *name = [args objectAtIndex:0];
+    NKLibrary *library = [NKLibrary sharedLibrary];
+    NKIssue *nkIssue = [library issueWithName:name];
+    NSLog(@"[INFO] (getIssue) Listing Issue: %@",nkIssue);
+    NSMutableDictionary *issue = [NSMutableDictionary dictionary];
+    [issue setObject: nkIssue.name  forKey: @"name"];
+    [issue setObject: nkIssue.date forKey:  @"date"];
+    [issue setObject: nkIssue.contentURL forKey:  @"contentURL"];
+    //[issue setObject: nkIssue.assetDownloads forKey: @"assetDownloads"];
+    return issue;
+
+}
+
+// We can removeIssue from the NKLibary. Takes 1 param, unique name
+// Returns true or false
+-(id)removeIssue:(id)args
+{
+    NSString *name = [args objectAtIndex:0];
+    NKLibrary *library = [NKLibrary sharedLibrary];
+    //NSLog(@"[INFO] (removeIssue) Library: %@",library);
+    NKIssue *issue = [library issueWithName:name]; 
+    if (issue)
+    {
+        [[NKLibrary sharedLibrary] removeIssue:issue];
+        return @"true";
+    } else {
+        return @"false";
+    }
+}
+
+
+
+
 
 
 @end

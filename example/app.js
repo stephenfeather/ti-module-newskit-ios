@@ -17,29 +17,16 @@ var newskit = require('com.featherdirect.newskit');
 Ti.API.info("module is => " + newskit);
 
 // We can enableDevMode which removes the Newsstand Notifications Throttle
-newskit.enableDevMode;
+//newskit.enableDevMode;
 
-
+// We can add an issue to the NKLibrary
+newskit.addIssue('test0001','2011-10-01');
 
 
 label.text = newskit.example();
 
 Ti.API.info("module exampleProp is => " + newskit.exampleProp);
-newskit.exampleProp = "This is a test value";
+newskit.setExampleProp = "This is a test value";
 
-if (Ti.Platform.name == "android") {
-	var proxy = newskit.createExample({
-		message: "Creating an example Proxy",
-		backgroundColor: "red",
-		width: 100,
-		height: 100,
-		top: 100,
-		left: 150
-	});
 
-	proxy.printMessage("Hello world!");
-	proxy.message = "Hi world!.  It's me again.";
-	proxy.printMessage("Hello world!");
-	win.add(proxy);
-}
 
