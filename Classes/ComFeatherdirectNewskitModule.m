@@ -51,8 +51,9 @@
 	
 	NSLog(@"[INFO] %@ loaded",self);
     
-    // We need to restart any paused downloads
+   
     
+    // TODO: We need to restart any paused downloads. This needs done immediately at app startup (didFinishLoadingWithParams)
     //NSUInteger count  = [library downloadingAssets].count;
     //NSLog(@"Download Count: %@", count);
     //for(NSUInteger i = 0 ; i < count ; i++)
@@ -216,7 +217,7 @@
     NSLog(@"[DEBUG] assetDownload: %@", assetDownload);
     [assetDownload setUserInfo:[NSDictionary dictionaryWithObjectsAndKeys: name, @"Index", nil]];
     // let's start download
-    // NOTE: This is the delegate call that crashes
+    // TODO: This is the delegate call that crashes
     [assetDownload downloadWithDelegate:self];
     
     
@@ -249,7 +250,7 @@
 }
 
 -(void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
-    
+    // TODO: Need to make a call out to unzip our issue bundle into the nkIssue.contentURL
     NSLog(@"[INFO] (connectionDidFinishDownloading) %@",destinationURL);
 }
 
