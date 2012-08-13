@@ -6,7 +6,7 @@ version: 0.1
 apiversion: 2
 description: NewsKit for Titanium
 author: Stephen Feather
-license: Specify your license
+license: Apache License, Version 2.0
 copyright: Copyright (c) 2012 by Stephen Feather
 
 

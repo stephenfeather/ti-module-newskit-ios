@@ -7,8 +7,12 @@
 #import "TiModule.h"
 #import <NewsstandKit/NewsstandKit.h>
 
-@interface ComFeatherdirectNewskitModule : TiModule 
+@interface ComFeatherdirectNewskitModule : TiModule <NSURLConnectionDownloadDelegate, NSURLConnectionDelegate>
+
 {
+    NKLibrary *library;
 }
+
+
 
 @end

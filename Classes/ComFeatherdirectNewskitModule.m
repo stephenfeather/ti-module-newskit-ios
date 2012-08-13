@@ -1,16 +1,21 @@
 /**
- * Your Copyright Here
+ * NewsKit Titanium Module is Copyright 2012, Stephen Feather
+ * Licensed under the Apache Public License (version 2)
  *
  * Appcelerator Titanium is Copyright (c) 2009-2010 by Appcelerator, Inc.
  * and licensed under the Apache Public License (version 2)
  */
 #import "ComFeatherdirectNewskitModule.h"
+#import "TiApp.h"
 #import "TiBase.h"
 #import "TiHost.h"
 #import "TiUtils.h"
+//#import "ComFeatherdirectNewskitConnectionProxy.h"
 #import <NewsstandKit/NewsstandKit.h>
 
 @implementation ComFeatherdirectNewskitModule
+
+
 
 #pragma mark Internal
 
@@ -30,13 +35,44 @@
 
 -(void)startup
 {
-	// this method is called when the module is first loaded
+	
+    if (![NSThread isMainThread]) {
+		__block id result = nil;
+		TiThreadPerformOnMainThread(^{[self loadingLibrary];}, YES);
+	} else {
+        [self loadingLibrary];
+        
+    }
+    
+    //[self doesNotRecognizeSelector:_cmd];
+    // this method is called when the module is first loaded
 	// you *must* call the superclass
 	[super startup];
 	
 	NSLog(@"[INFO] %@ loaded",self);
     
+    // We need to restart any paused downloads
+    
+    //NSUInteger count  = [library downloadingAssets].count;
+    //NSLog(@"Download Count: %@", count);
+    //for(NSUInteger i = 0 ; i < count ; i++)
+    //{
+    //    NSLog(@"We have some pending downloads");
+    //    NKAssetDownload *asset = [[library downloadingAssets] objectAtIndex:i];
+        
+    //    [asset downloadWithDelegate: self];
+        
+    //}
+    
 
+}
+
+
+- (void) loadingLibrary
+{
+    library = [NKLibrary sharedLibrary];
+    
+    
 }
 
 -(void)shutdown:(id)sender
@@ -89,23 +125,6 @@
 
 #pragma Public APIs
 
--(id)example:(id)args
-{
-	// example method
-	return @"hello world";
-}
-
--(id)exampleProp
-{
-	// example property getter
-	return @"hello world";
-}
-
--(void)setExampleProp:(id)value
-{
-	// example property setter
-}
-
 
 // We can enableDevMode which removes the once per day throttle from news stand notifications
 -(void)enableDevMode
@@ -117,7 +136,7 @@
 
 // We can addIssue to the NKLibrary. Takes 2 params, unique name and date (yyyy-MM-dd)
 // Returns an array of information about the issue.  If the issue is new, then newIssue is true
--(id)addIssue:(id)args
+-(NSMutableDictionary*)addIssue:(id)args
 {
     NSString *name = [args objectAtIndex:0];
     NSString *dateStr = [args objectAtIndex:1];
@@ -125,7 +144,7 @@
     [dateFormat setDateFormat:@"yyyy-MM-dd"];
     NSDate *date = [dateFormat dateFromString:dateStr];
     [dateFormat release];
-    NKLibrary *library = [NKLibrary sharedLibrary];
+    //NKLibrary *library = [NKLibrary sharedLibrary];
     NKIssue *nkIssue = [library issueWithName:name];
     NSMutableDictionary *issue = [NSMutableDictionary dictionary];
     if(!nkIssue) {
@@ -145,8 +164,9 @@
 // Returns an array of information about the issue.
 -(id)getIssue:(id)args
 {
+    //NSString *name = input;
     NSString *name = [args objectAtIndex:0];
-    NKLibrary *library = [NKLibrary sharedLibrary];
+    //NKLibrary *library = [NKLibrary sharedLibrary];
     NKIssue *nkIssue = [library issueWithName:name];
     NSLog(@"[INFO] (getIssue) Listing Issue: %@",nkIssue);
     NSMutableDictionary *issue = [NSMutableDictionary dictionary];
@@ -162,9 +182,9 @@
 // Returns true or false
 -(id)removeIssue:(id)args
 {
-    NSString *name = [args objectAtIndex:0];
-    NKLibrary *library = [NKLibrary sharedLibrary];
-    //NSLog(@"[INFO] (removeIssue) Library: %@",library);
+    NSString *name = [TiUtils stringValue:args];
+    //NKLibrary *library = [NKLibrary sharedLibrary];
+    NSLog(@"[INFO] (removeIssue) Library: %@",library);
     NKIssue *issue = [library issueWithName:name]; 
     if (issue)
     {
@@ -175,6 +195,95 @@
     }
 }
 
+// We can downloadAsset and associate them with NKIssues in the NKLibrary. Takes 2 params, unique name and url
+-(id)downloadAsset:(id)args
+{
+	NSLog(@"[DEBUG] downloadAsset");
+
+	NSString *name = [args objectAtIndex:0];
+    NSLog(@"[DEBUG] name: %@", name);
+    NSString *urlStr = [args objectAtIndex:1];
+    NSLog(@"[DEBUG] urlStr: %@", urlStr);
+    NSURL *downloadUrl = [NSURL URLWithString: urlStr];
+	NSLog(@"[DEBUG] URL: %@", downloadUrl);
+    
+    //NKLibrary *library = [NKLibrary sharedLibrary];
+    NKIssue *nkIssue = [library issueWithName:name];
+    NSLog(@"[DEBUG] nkIssue: %@", nkIssue);
+    NSURLRequest *req = [NSURLRequest requestWithURL:downloadUrl];
+    NSLog(@"[DEBUG] req: %@", req);
+    NKAssetDownload *assetDownload = [nkIssue addAssetWithRequest:req];
+    NSLog(@"[DEBUG] assetDownload: %@", assetDownload);
+    [assetDownload setUserInfo:[NSDictionary dictionaryWithObjectsAndKeys: name, @"Index", nil]];
+    // let's start download
+    // NOTE: This is the delegate call that crashes
+    [assetDownload downloadWithDelegate:self];
+    
+    
+    
+}
+
+// NSURLConnection Delegate
+
+- (void)connection:(NSURLConnection*)connection didReceiveResponse:(NSURLResponse *)response
+{
+    //NSLog(@"Did Receive Response %@", response);
+    
+}
+
+- (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)data
+{
+    //NSLog(@"Did Receive Data %@", data);
+    
+}
+
+-(void)connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse
+{
+    //NSLog(@"[INFO] (willCacheResponse) %@",cachedResponse);
+	return nil;
+}
+
+- (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error
+{
+    //NSLog(@"Did Fail");
+}
+
+-(void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
+    
+    NSLog(@"[INFO] (connectionDidFinishDownloading) %@",destinationURL);
+}
+
+- (void)connectionDidResumeDownloading:(NSURLConnection *)connection totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes
+{
+    //NSLog(@"[INFO] (connectionDidResumeDownloadin) connection: %@",connection);
+    //NSLog(@"[INFO] (connectionDidResumeDownloadin) totalBytesWritten: %@",totalBytesWritten);
+    //NSLog(@"[INFO] (connectionDidResumeDownloadin) expectedTotalBytes: %@",expectedTotalBytes);
+    
+}
+
+-(void)connection:(NSURLConnection *)connection didWriteData:(long long)bytesWritten totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes {
+    NSLog(@"[INFO] (didWriteData )");
+    
+    
+}
+
+
+-(void)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse
+{
+    //NSLog(@"[INFO] (willSendRequest) %@",request);
+}
+
+
+
+- (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
+{
+    //NSLog(@"[INFO] (didSendBodyData)");
+}
+
+-(void)updateProgressOfConnection:(NSURLConnection *)connection withTotalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes
+{
+    NSLog(@"[INFO] (updateProgressOfConnection)");
+}
 
 
 

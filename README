@@ -1,2 +1,47 @@
 This module exposes the NewsStandKit from iOS to Titanium Applications
 
+Couple if things based upon restrictions from the Newsstand API
+
+1. The Newsstand API quietly will refuse to initialize if you dont have a 'newsstand' app.  In Titanium, you will need a custom info.plist to accomplish this:
+
+<key>UINewsstandApp</key>
+	<true/>
+<key>UIBackgroundModes</key>
+	<array>
+	 <string>newsstand-content</string>
+	</array>
+
+2. Because it is now a Newsstand app, you need new icons in your custom info.plist:
+
+<key>CFBundleIconFiles</key>
+<array>
+<string>appicon.png</string>
+<string>appicon@2x.png</string>
+<string>appicon-72.png</string>
+</array>
+<key>CFBundleIcons</key>
+<dict>
+<key>CFBundlePrimaryIcon</key>
+<dict>
+<key>CFBundleIconFiles</key>
+<array>
+<string>appicon.png</string>
+<string>appicon@2x.png</string>
+<string>appicon-72.png</string>
+</array>
+<key>UIPrerenderedIcon</key>
+<false/>
+</dict>
+<key>UINewsstandIcon</key>
+<dict>
+<key>CFBundleIconFiles</key>
+<array>
+<string>icon_newsstand.png</string>
+</array>
+<key>UINewsstandBindingEdge</key>
+<string>UINewsstandBindingEdgeLeft</string>
+<key>UINewsstandBindingType</key>
+<string>UINewsstandBindingTypeMagazine</string>
+</dict>
+
+

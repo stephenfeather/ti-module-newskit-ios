@@ -19,14 +19,18 @@ Ti.API.info("module is => " + newskit);
 // We can enableDevMode which removes the Newsstand Notifications Throttle
 //newskit.enableDevMode;
 
-// We can add an issue to the NKLibrary
-newskit.addIssue('test0001','2011-10-01');
+// We can add an issue to the NKLibrary (uniqueID, date)
+//newskit.addIssue('test0001','2011-10-01');
 
+// We can get information about an issue (uniqueID)
+//newskit.getIssue('test0002');
 
-label.text = newskit.example();
+// We can download the assets for an issue (uniqueID, assetURL)
+//newskit.downloadAsset('test0003', 'http://data.featherdirect.com/newsstand/issue32.zip');
 
-Ti.API.info("module exampleProp is => " + newskit.exampleProp);
-newskit.setExampleProp = "This is a test value";
+// We can remove and issue from the NKLibrary (uniqueID)
+//newskit.removeIssue('test0003');
+
 
 
 
