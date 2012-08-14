@@ -17,10 +17,10 @@ var newskit = require('com.featherdirect.newskit');
 Ti.API.info("module is => " + newskit);
 
 // We can enableDevMode which removes the Newsstand Notifications Throttle
-//newskit.enableDevMode;
+newskit.enableDevMode;
 
 // We can add an issue to the NKLibrary (uniqueID, date)
-//newskit.addIssue('test0001','2011-10-01');
+newskit.addIssue('test0001','2011-10-01');
 
 // We can get information about an issue (uniqueID)
 //newskit.getIssue('test0002');

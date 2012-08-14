@@ -126,6 +126,33 @@
 
 #pragma Public APIs
 
+// This should be called on startup
+-(void)checkForPendingDownloads:(id)args 
+{
+   for(NKAssetDownload *asset in [library downloadingAssets]) {
+       NSLog(@"Asset to downlaod: %@",asset);
+       [asset downloadWithDelegate:self];
+   }
+}
+
+// This function should be able to update the app icon
+-(void)updateIcon:(id)args 
+{
+    UIImage *newcover = [[UIImage alloc] initWithContentsOfFile:[args objectForKey:@"coverImage"]];
+    [[UIApplication sharedApplication] setNewsstandIconImage:newcover];
+}
+
+// This function will set the currently reading issue (important to avoid the issue being removed from cache)
+-(void)currentlyReadingIssue:(id)args 
+{
+    NSString *name = [args objectForKey:@"name"];
+    NKIssue *nkIssue = [library issueWithName:name];
+    
+    [library setCurrentlyReadingIssue: nkIssue];
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+
+}
+
 
 // We can enableDevMode which removes the once per day throttle from news stand notifications
 -(void)enableDevMode
@@ -139,13 +166,14 @@
 // Returns an array of information about the issue.  If the issue is new, then newIssue is true
 -(NSMutableDictionary*)addIssue:(id)args
 {
-    NSString *name = [args objectAtIndex:0];
-    NSString *dateStr = [args objectAtIndex:1];
-    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    NSString *name                  = [args objectAtIndex:0];
+    NSString *dateStr               = [args objectAtIndex:1];
+    NSDateFormatter *dateFormat     = [[NSDateFormatter alloc] init];
+    
     [dateFormat setDateFormat:@"yyyy-MM-dd"];
     NSDate *date = [dateFormat dateFromString:dateStr];
     [dateFormat release];
-    //NKLibrary *library = [NKLibrary sharedLibrary];
+
     NKIssue *nkIssue = [library issueWithName:name];
     NSMutableDictionary *issue = [NSMutableDictionary dictionary];
     if(!nkIssue) {
@@ -165,10 +193,9 @@
 // Returns an array of information about the issue.
 -(id)getIssue:(id)args
 {
-    //NSString *name = input;
-    NSString *name = [args objectAtIndex:0];
-    //NKLibrary *library = [NKLibrary sharedLibrary];
-    NKIssue *nkIssue = [library issueWithName:name];
+    NSString *name      = [args objectAtIndex:0];
+    NKIssue *nkIssue    = [library issueWithName:name];
+    
     NSLog(@"[INFO] (getIssue) Listing Issue: %@",nkIssue);
     NSMutableDictionary *issue = [NSMutableDictionary dictionary];
     [issue setObject: nkIssue.name  forKey: @"name"];
@@ -184,17 +211,21 @@
 -(id)removeIssue:(id)args
 {
     NSString *name = [TiUtils stringValue:args];
-    //NKLibrary *library = [NKLibrary sharedLibrary];
     NSLog(@"[INFO] (removeIssue) Library: %@",library);
+
     NKIssue *issue = [library issueWithName:name]; 
     if (issue)
     {
-        [[NKLibrary sharedLibrary] removeIssue:issue];
+        [library removeIssue:issue];
         return @"true";
-    } else {
+    } 
+    else 
+    {
         return @"false";
     }
 }
+
+/*
 
 // We can downloadAsset and associate them with NKIssues in the NKLibrary. Takes 2 params, unique name and url
 -(id)downloadAsset:(id)args
@@ -219,75 +250,58 @@
     // let's start download
     // TODO: This is the delegate call that crashes
     [assetDownload downloadWithDelegate:self];
-    
-    
-    
+    [assetDownload setUserInfo:[NSDictionary dictionaryWithObjectsAndKeys:name,@"Name", nil]];
+
 }
+*/
 
-// NSURLConnection Delegate
-
-- (void)connection:(NSURLConnection*)connection didReceiveResponse:(NSURLResponse *)response
+-(id)downloadAsset:(id)args
 {
-    //NSLog(@"Did Receive Response %@", response);
+    NSString *name      = [args objectAtIndex:0];
+    NSString *urlStr    = [args objectAtIndex:1];
+    NSURL *downloadUrl  = [NSURL URLWithString: urlStr];
     
-}
-
-- (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)data
-{
-    //NSLog(@"Did Receive Data %@", data);
+    NKIssue *nkIssue = [library issueWithName:name];
+    //NSURL *downloadURL = [publisher contentURLForIssueWithName:nkIssue.name];
+    NSURL *downloadURL = [[NSURL alloc] initWithString:urlStr];
     
+    if(!downloadURL) return;
+    NSURLRequest *req = [NSURLRequest requestWithURL:downloadURL];
+    NKAssetDownload *assetDownload = [nkIssue addAssetWithRequest:req];
+    [assetDownload downloadWithDelegate:self];
+    [assetDownload setUserInfo:[NSDictionary dictionaryWithObjectsAndKeys:name,@"Name", nil]];
 }
 
--(void)connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse
-{
-    //NSLog(@"[INFO] (willCacheResponse) %@",cachedResponse);
-	return nil;
-}
+#pragma mark - NSURLConnectionDownloadDelegate
 
-- (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error
-{
-    //NSLog(@"Did Fail");
-}
-
--(void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
-    // TODO: Need to make a call out to unzip our issue bundle into the nkIssue.contentURL
-    NSLog(@"[INFO] (connectionDidFinishDownloading) %@",destinationURL);
-}
-
-- (void)connectionDidResumeDownloading:(NSURLConnection *)connection totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes
-{
-    //NSLog(@"[INFO] (connectionDidResumeDownloadin) connection: %@",connection);
-    //NSLog(@"[INFO] (connectionDidResumeDownloadin) totalBytesWritten: %@",totalBytesWritten);
-    //NSLog(@"[INFO] (connectionDidResumeDownloadin) expectedTotalBytes: %@",expectedTotalBytes);
-    
+-(void)updateProgressOfConnection:(NSURLConnection *)connection withTotalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes {
+    // get asset
+    NKAssetDownload *dnl = connection.newsstandAssetDownload;
+    NSLog(@"Progress: %d", 1.f * totalBytesWritten / expectedTotalBytes);
 }
 
 -(void)connection:(NSURLConnection *)connection didWriteData:(long long)bytesWritten totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes {
-    NSLog(@"[INFO] (didWriteData )");
+    [self updateProgressOfConnection:connection withTotalBytesWritten:totalBytesWritten expectedTotalBytes:expectedTotalBytes];
+}
+
+-(void)connectionDidResumeDownloading:(NSURLConnection *)connection totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes {
+    NSLog(@"Resume downloading %f",1.f*totalBytesWritten/expectedTotalBytes);
+    [self updateProgressOfConnection:connection withTotalBytesWritten:totalBytesWritten expectedTotalBytes:expectedTotalBytes];
+}
+
+-(void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
+    // copy file to destination URL
+    NKAssetDownload *dnl = connection.newsstandAssetDownload;
+    NKIssue *nkIssue = dnl.issue;
+    //NSString *contentPath = [nkIssue.contentURL path];
+    NSString *contentPath = [[nkIssue.contentURL path] stringByAppendingPathComponent:@"magazine.pdf"];
+    NSError *moveError=nil;
+    NSLog(@"File is being copied to %@",contentPath);
     
+    if([[NSFileManager defaultManager] moveItemAtPath:[destinationURL path] toPath:contentPath error:&moveError]==NO) {
+        NSLog(@"Error copying file from %@ to %@",destinationURL,contentPath);
+    }
     
 }
-
-
--(void)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse
-{
-    //NSLog(@"[INFO] (willSendRequest) %@",request);
-}
-
-
-
-- (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
-{
-    //NSLog(@"[INFO] (didSendBodyData)");
-}
-
--(void)updateProgressOfConnection:(NSURLConnection *)connection withTotalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes
-{
-    NSLog(@"[INFO] (updateProgressOfConnection)");
-}
-
-
-
-
 
 @end
