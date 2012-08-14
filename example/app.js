@@ -16,17 +16,31 @@ win.open();
 var newskit = require('com.featherdirect.newskit');
 Ti.API.info("module is => " + newskit);
 
-// We can enableDevMode which removes the Newsstand Notifications Throttle
-//newskit.enableDevMode;
 
-// We can add an issue to the NKLibrary (uniqueID, date)
-//newskit.addIssue('test0001','2011-10-01');
-
-// We can get information about an issue (uniqueID)
-//newskit.getIssue('test0002');
-
-// We can download the assets for an issue (uniqueID, assetURL)
-//newskit.downloadAsset('test0003', 'http://data.featherdirect.com/newsstand/issue32.zip');
+win.addEventListener('open', function(){
+	
+	newskit.addEventListener('progress', function(e){
+	  	Ti.API.info("Download progress (" + e.name + ") = " + e.bytesWritten + " of " + e.totalBytes);
+	});
+	
+	newskit.addEventListener('complete', function(e){
+	  	Ti.API.info("Issue downloaded (" + e.name + ")");
+	});
+	
+	newskit.addEventListener('error', function(e){
+	  	Ti.API.info("Issue error (Code: " + e.code + ", Description: " + e.description + ")");
+	});
+	
+	
+	// We can add an issue to the NKLibrary (uniqueID, date)
+	newskit.addIssue('test0001','2011-10-01');
+	
+	// We can get information about an issue (uniqueID)
+	newskit.getIssue('test0001');
+	
+	// We can download the assets for an issue (uniqueID, assetURL)
+	newskit.downloadAsset('test0001', 'http://data.featherdirect.com/newsstand/issue32.zip');
+});
 
 // We can remove and issue from the NKLibrary (uniqueID)
 //newskit.removeIssue('test0003');
