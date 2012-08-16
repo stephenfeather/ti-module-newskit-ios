@@ -1,5 +1,7 @@
 This module exposes the NewsStandKit from iOS to Titanium Applications
 
+First off, many thanks to @swanify for building out the events and getting rid of that darn NSURLConnectionDelegate bug.
+
 Couple if things based upon restrictions from the Newsstand API
 
 1. The Newsstand API quietly will refuse to initialize if you dont have a 'newsstand' app.  In Titanium, you will need a custom info.plist to accomplish this:
