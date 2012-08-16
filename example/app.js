@@ -42,7 +42,7 @@ win.addEventListener('open', function(){
 	newskit.downloadAsset('test0001', 'http://data.featherdirect.com/newsstand/issue32.zip');
 });
 
-// We can remove and issue from the NKLibrary (uniqueID)
+// We can remove an issue from the NKLibrary (uniqueID)
 //newskit.removeIssue('test0003');
 
 
