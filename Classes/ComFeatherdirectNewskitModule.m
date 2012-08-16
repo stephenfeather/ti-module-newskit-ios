@@ -278,6 +278,7 @@
 {
     NKAssetDownload *dnl        = connection.newsstandAssetDownload;
     NKIssue *nkIssue            = dnl.issue;
+    // TODO: The file name will eventually need to come from the download string as some folks may have mulitiple assets to be downloaded
     NSString *contentPath       = [[nkIssue.contentURL path] stringByAppendingPathComponent:@"magazine.pdf"];
     NSError *moveError          = nil;
     
