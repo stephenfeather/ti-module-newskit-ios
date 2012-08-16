@@ -60,6 +60,21 @@ This associated a downloadAsset in the library with the issue we have already ad
 	newskit.downloadAsset('test0001', 'http://data.mydomain.com/com.mypublication.test0001/test0001.zip');
 
 
+### newskit.currentlyReadingIssue(uniqueID[string])
+
+This keeps the iOS cache system from deleting the assets associated with the issue the end user may currently be viewing
+
+	newskit.currentlyReadingIssue('test0001');
+
+
+
+### newskit.updateIcon(imageURL[string])
+
+This updated the icon used to display your application in the Newsstand. This should be a locally sourced image.
+
+	newskit.updateIcon('myimage.png');
+
+
 ### ___PROJECTNAMEASIDENTIFIER__.property
 
 TODO: This is an example of a module property.
