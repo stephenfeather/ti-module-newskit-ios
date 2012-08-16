@@ -74,14 +74,50 @@ This updated the icon used to display your application in the Newsstand. This sh
 
 	newskit.updateIcon('myimage.png');
 
+## Events
 
-### ___PROJECTNAMEASIDENTIFIER__.property
+### newskit.addEventListener('progress')
+This event fires as an asset is being downloaded.
 
-TODO: This is an example of a module property.
+	newskit.addEventListener('progress', function(e){
+	  	Ti.API.info("Download progress (" + e.name + ") = " + e.bytesWritten + " of " + e.totalBytes);
+	});
+
+	// The uniqueID for our issue
+	e.name
+
+	// The size of our asset
+	e.totalBytes
+	
+	// The number of bytes written so far
+	e.bytesWritten
+
+### newskit.addEventListener('complete')
+This event fires upon completion of an asset download.
+
+	newskit.addEventListener('complete', function(e){
+	  	Ti.API.info("Issue downloaded (" + e.name + ")");
+	});
+
+	// the uniqueID for our issue
+	e.name
+
+	// The name and location of the downloaded asset
+	e.contentPath
+
+### newskit.addEventListener('error')
+This even fires if there is a problem downloading an asset.
+
+	newskit.addEventListener('error', function(e){
+	  	Ti.API.info("Issue error (Code: " + e.code + ", Description: " + e.description + ")");
+	});
+
+	e.code
+	e.description
 
 ## Usage
 
-Best to refer to the app.js for example usage
+Please check the examples/app.js for the full API demonstration.
 
 ## Author
 
@@ -92,4 +128,4 @@ stephen@featherdirect.com
 
 ## License
 
-TODO: Enter your license/legal information here.
+This module is licensed under the Apache License, Version 2.0. Please see the LICENSE file for details.
