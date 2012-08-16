@@ -278,8 +278,7 @@
 {
     NKAssetDownload *dnl        = connection.newsstandAssetDownload;
     NKIssue *nkIssue            = dnl.issue;
-    // TODO: The file name will eventually need to come from the download string.  For now, FeatherDirect Projects pull a zip. Swanify pulls a PDF file.
-    NSString *contentPath       = [[nkIssue.contentURL path] stringByAppendingPathComponent:@"bundle.zip"];
+    NSString *contentPath       = [[nkIssue.contentURL path] stringByAppendingPathComponent:@"magazine.pdf"];
     NSError *moveError          = nil;
     
     NSLog(@"File is being copied to %@",contentPath);
